@@ -77,11 +77,30 @@ const CourseInfo = {
         submitted_at: "2023-03-07",
         score: 140
       }
+    },
+    {
+      learner_id: 555,
+      assignment_id: 1,
+      submission: {
+        submitted_at: "2023-03-07",
+        score: 140
+      }
+    },
+    {
+      learner_id: 101,
+      assignment_id: 3,
+      submission: {
+        submitted_at: "2023-03-07",
+        score: 140
+      }
     }
   ];
   
-  function getLearnerData(course, ag, submissions) {
-    return isValidScore(LearnerSubmissions[0].submission.score,AssignmentGroup.assignments[0].points_possible)
+  function getLearnerData(course, ag, subs) {
+    const result=[];
+    // console.log(subs);
+    const students=uniqueLearner(subs);
+    return students;
     // Here is an example of what we are looking for, but no math was done
     // const result = [
     //   {
@@ -138,10 +157,25 @@ const CourseInfo = {
     if (Date.valueOf(submitDate) > Date.valueOf(dueDate)) return true;
     return false;
   }
+  function uniqueLearner(array){
+    // take the Array of submissions and return
+    // the ids of Unique students
+    const learner = [];
+    for (let x=0;x<array.length;x++){
+      if (!learner.includes(array[x].learner_id)) learner.push(array[x].learner_id);
+    }
+    learner.sort((a, b) => a - b);
+    return learner;
+  }
   function splitLearner(array,learnID){
     // Take the -array- of Number scores, make a new array,
     // and split out one specific learner by -learnID-
-
+    // then return that array
+    const learner = [];
+    for (const e of array){
+      if (array[e].learner_id === learnID) learner.push(array[e]);
+    }
+    return learner;
   }
   function gradeLearner(){
 
