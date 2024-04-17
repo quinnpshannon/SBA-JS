@@ -116,12 +116,14 @@ const CourseInfo = {
     const result=[];
     const students=uniqueLearner(subs);
     const grades=[];
-    for(let x=0;x<students.length;x++){
-      grades.push(splitLearner(subs,students[x]));
-    }
-    for(let x=0;x<grades.length;x++){
-      gradeLearner(grades[x],ag);
-    }
+    students.forEach(ele => {
+      grades.push(splitLearner(subs,ele));
+    });
+    grades.forEach(ele => {
+      gradeLearner(ele,ag); 
+      // OK, this doesn't actually return anything yet
+      // that's why I'm not seeing any results!
+    });
     return grades;
     // Here is an example of what we are looking for, but no math was done
     // const result = [
@@ -176,9 +178,9 @@ const CourseInfo = {
     // take the -array- of submissions and return
     // an array with the sorted ids of Unique students
     const learner = [];
-    for (let x=0;x<array.length;x++){
-      if (!learner.includes(array[x].learner_id)) learner.push(array[x].learner_id);
-    }
+    array.forEach(ele => {
+      if (!learner.includes(ele.learner_id)) learner.push(ele.learner_id);
+    });
     learner.sort((a, b) => a - b);
     return learner;
   }
@@ -187,9 +189,9 @@ const CourseInfo = {
     // and split out one specific learner by -learnID-
     // then return that array
     const learner = [];
-    for(let x=0;x<array.length;x++){
-      if(array[x].learner_id === learnID) learner.push(array[x]);
-    }
+    array.forEach(element => {
+      if(element.learner_id === learnID) learner.push(element);
+    });
     learner.sort((a, b) => a.assignment_id - b.assignment_id);
     return learner;
   }
@@ -197,17 +199,22 @@ const CourseInfo = {
     // Here we are going to take two arrays, and do some math
     // we loop through the array -subs- and compare the assignment_id to
     // the assignment_id in the array -assigned-
-    for(let x=0;x<subs.length;x++){
-      console.log(subs[x].submission.score);
-      for(let y=0;y<assigned.assignments.length;y++){
-        if(subs[x].assignment_id === assigned.assignments[y].id){
+    const checkem = [];
+    subs.forEach(subEle => {
+      //console.log(subEle.submission.score);
+      assigned.assignments.forEach(assignEle => {
+        if(subEle.assignment_id === assignEle.id){
           // we check to see if it is a Valid Score
-          if (isValidScore(subs[x].submission.score,assigned.assignments[y].points_possible)){
+          if (isValidScore(subEle.submission.score,assignEle.points_possible)){
             // we check to see if it is due
             // Actually, we are going to do that later. Right now just want to see if this syntax is right
-            console.log(subs[x].submission.score/assigned.assignments[y].points_possible);
+            if (isDue(assignEle.due_at,subEle.submission.submitted_at)){
+              isLate(assignEle.due_at,subEle.submission.submitted_at) ?checkem.push(subEle.submission.score-10) : checkem.push(subEle.submission.score) ;
+            }
+            if(isLate(assignEle.due_at,subEle.submission.submitted_at)) console.log("It's Late!");
+            //console.log(subs[x].submission.score/assigned.assignments[y].points_possible);
           }
         }
-      }
-    }
+      });
+    });
   }
