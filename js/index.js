@@ -1,12 +1,8 @@
 // The provided course information.
-// const CourseInfo = {
-//     id: 999,
-//     name: "Introduction to JavaScript"
-//   };
 const CourseInfo = {
     id: 451,
     name: "Introduction to JavaScript"
-  }; //Default Data
+  }; // Default Data
   
   // The provided assignment group.
   const AssignmentGroup = {
@@ -34,7 +30,7 @@ const CourseInfo = {
         points_possible: 500
       }
     ]
-  };
+  }; // Default Data
   
   // The provided learner submission data.
   const LearnerSubmissions = [
@@ -91,7 +87,7 @@ const CourseInfo = {
       assignment_id: 1,
       submission: {
         submitted_at: "2023-03-07",
-        score: 140
+        score: 40
       }
     },
     {
@@ -102,17 +98,31 @@ const CourseInfo = {
         score: 140
       }
     }
-  ];
-  
+  ]; // Default Data, plus some additions
+  /*  Start of the Program!
+      First we have a try catch. There are a bunch of things that will throw errors
+      in the program, and I tried to account for a bunch of weird situations
+      just in case that things didn't process properly.
+  */
+  try {
+    const result = getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions);
+    console.log(result);
+  }
+  catch (e) {
+    console.error(e);
+  }
   function getLearnerData(course, ag, subs) {
+    if (bouncer(course.id,ag.course_id)) throw new Error('Assignment Group is not part of the Course group!');
     const result=[];
     const students=uniqueLearner(subs);
     const grades=[];
     for(let x=0;x<students.length;x++){
       grades.push(splitLearner(subs,students[x]));
     }
-    console.log(grades);
-    return students;
+    for(let x=0;x<grades.length;x++){
+      gradeLearner(grades[x],ag);
+    }
+    return grades;
     // Here is an example of what we are looking for, but no math was done
     // const result = [
     //   {
@@ -130,34 +140,27 @@ const CourseInfo = {
     // ];
     return result;
   }
-  try {
-  if (bouncer(CourseInfo.id,AssignmentGroup.course_id)){
-    throw new Error('Assignment Group is not part of the Course group!')
-  }
-  const result = getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions);
-  
-  console.log(result);
-  }
-  catch (e) {
-    console.error(e);
-  }
   function bouncer(base, compare){
+    // It's called the bouncer, because it checks ID. If they don't match
+    // the data gets Thrown out.
     return base !== compare;
   }
   function isValidScore(pts,total){
-    if(total===0) {
+    // This function throws errors if the score is invalid in any way
+    // Well, at least the ways that I can think of.
+    if(total===0) { // Can't divide by Zero
       throw new Error('Cannot be worth Zero points');
     }
-    if (typeof pts != "number"){
+    if (typeof pts != "number"){ // if the number of points attained isn't a number
       throw new Error('Points is not a Number Value!');  
     }
-    if (typeof total != "number"){
+    if (typeof total != "number"){ // if the number of total points isn't a number
       throw new Error('Total is not a Number Value!');  
     }
-    if (pts > total){
+    if (pts > total){ // If they earned more points than possible
       throw new Error('Not Valid score, No extra credit!');
     }
-    return true;
+    return true; // Otherwise, Data looks good!
   }
   function isDue(dueDate,submitDate){
     // If the assignment is Due, return true
@@ -170,8 +173,8 @@ const CourseInfo = {
     return false;
   }
   function uniqueLearner(array){
-    // take the Array of submissions and return
-    // the ids of Unique students
+    // take the -array- of submissions and return
+    // an array with the sorted ids of Unique students
     const learner = [];
     for (let x=0;x<array.length;x++){
       if (!learner.includes(array[x].learner_id)) learner.push(array[x].learner_id);
@@ -190,5 +193,21 @@ const CourseInfo = {
     learner.sort((a, b) => a.assignment_id - b.assignment_id);
     return learner;
   }
-  function gradeLearner(){
+  function gradeLearner(subs,assigned){
+    // Here we are going to take two arrays, and do some math
+    // we loop through the array -subs- and compare the assignment_id to
+    // the assignment_id in the array -assigned-
+    for(let x=0;x<subs.length;x++){
+      console.log(subs[x].submission.score);
+      for(let y=0;y<assigned.assignments.length;y++){
+        if(subs[x].assignment_id === assigned.assignments[y].id){
+          // we check to see if it is a Valid Score
+          if (isValidScore(subs[x].submission.score,assigned.assignments[y].points_possible)){
+            // we check to see if it is due
+            // Actually, we are going to do that later. Right now just want to see if this syntax is right
+            console.log(subs[x].submission.score/assigned.assignments[y].points_possible);
+          }
+        }
+      }
+    }
   }
