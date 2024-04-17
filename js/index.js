@@ -34,6 +34,50 @@ const CourseInfo = {
   
   // The provided learner submission data.
   const LearnerSubmissions = [
+  {
+    learner_id: 125,
+    assignment_id: 1,
+    submission: {
+      submitted_at: "2023-01-25",
+      score: 47
+    }
+  },
+  {
+    learner_id: 125,
+    assignment_id: 2,
+    submission: {
+      submitted_at: "2023-02-12",
+      score: 150
+    }
+  },
+  {
+    learner_id: 125,
+    assignment_id: 3,
+    submission: {
+      submitted_at: "2023-01-25",
+      score: 400
+    }
+  },
+  {
+    learner_id: 132,
+    assignment_id: 1,
+    submission: {
+      submitted_at: "2023-01-24",
+      score: 39
+    }
+  },
+  {
+    learner_id: 132,
+    assignment_id: 2,
+    submission: {
+      submitted_at: "2023-03-07",
+      score: 140
+    }
+  }
+];
+
+ /*
+  const LearnerSubmissions = [
     {
       learner_id: 125,
       assignment_id: 1,
@@ -98,7 +142,8 @@ const CourseInfo = {
         score: 140
       }
     }
-  ]; // Default Data, plus some additions
+  ]; */
+  // Default Data, plus some additions
   /*  Start of the Program!
       First we have a try catch. There are a bunch of things that will throw errors
       in the program, and I tried to account for a bunch of weird situations
@@ -120,11 +165,10 @@ const CourseInfo = {
       grades.push(splitLearner(subs,ele));
     });
     grades.forEach(ele => {
-      gradeLearner(ele,ag); 
+      result.push(gradeLearner(ele,ag)); 
       // OK, this doesn't actually return anything yet
       // that's why I'm not seeing any results!
     });
-    return grades;
     // Here is an example of what we are looking for, but no math was done
     // const result = [
     //   {
@@ -164,14 +208,18 @@ const CourseInfo = {
     }
     return true; // Otherwise, Data looks good!
   }
-  function isDue(dueDate,submitDate){
+  function isDue(dueDate){
     // If the assignment is Due, return true
-    if (Date.valueOf(dueDate) <= Date.now()) return true;
+    if (Date.parse(dueDate) <= Date.now()){
+      return true;
+    }
     return false;
   }
   function isLate(dueDate,submitDate){
     // If the assignment is late, Return True
-    if (Date.valueOf(submitDate) > Date.valueOf(dueDate)) return true;
+    if (Date.parse(dueDate) < Date.parse(submitDate)){
+      return true;
+    }
     return false;
   }
   function uniqueLearner(array){
@@ -199,7 +247,13 @@ const CourseInfo = {
     // Here we are going to take two arrays, and do some math
     // we loop through the array -subs- and compare the assignment_id to
     // the assignment_id in the array -assigned-
-    const checkem = [];
+    const result = {
+    };
+    result.id = subs[0].learner_id;
+    result.avg = 0;
+    let tmpAvg = 0;
+    let points = 0;
+    let total = 0;
     subs.forEach(subEle => {
       //console.log(subEle.submission.score);
       assigned.assignments.forEach(assignEle => {
@@ -207,14 +261,30 @@ const CourseInfo = {
           // we check to see if it is a Valid Score
           if (isValidScore(subEle.submission.score,assignEle.points_possible)){
             // we check to see if it is due
-            // Actually, we are going to do that later. Right now just want to see if this syntax is right
-            if (isDue(assignEle.due_at,subEle.submission.submitted_at)){
-              isLate(assignEle.due_at,subEle.submission.submitted_at) ?checkem.push(subEle.submission.score-10) : checkem.push(subEle.submission.score) ;
+            if (isDue(assignEle.due_at)){
+              // If it is due we add the total points to the Totals
+              total+=assignEle.points_possible;
+              if (isLate(assignEle.due_at,subEle.submission.submitted_at)){
+                // then the Adjusted point total if it is late
+                tmpAvg = subEle.submission.score-assignEle.points_possible/10
+                points+=(tmpAvg);
+                tmpAvg/=assignEle.points_possible; //and calculate the average
+                Object.defineProperty(result,''+assignEle.id,{value: tmpAvg});
+                // And get tricky to convince the object that we can name
+                // a key with a number value by convincing it that it
+                // is a totally normal string
+              } else { // otherwise
+                tmpAvg = subEle.submission.score // we add the normal points
+                points+=(tmpAvg);
+                tmpAvg/=assignEle.points_possible; //and the average
+                Object.defineProperty(result,''+assignEle.id,{value: tmpAvg});
+                //more Trickery !
+              }
             }
-            if(isLate(assignEle.due_at,subEle.submission.submitted_at)) console.log("It's Late!");
-            //console.log(subs[x].submission.score/assigned.assignments[y].points_possible);
           }
         }
       });
     });
+    result.avg = points/total; // Now we calculate the learner's overall average
+    return result; // and go ahead and send that back. Grading papers is hard!
   }
