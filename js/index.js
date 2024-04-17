@@ -72,6 +72,14 @@ const CourseInfo = {
     },
     {
       learner_id: 132,
+      assignment_id: 3,
+      submission: {
+        submitted_at: "2023-03-07",
+        score: 440
+      }
+    },
+    {
+      learner_id: 132,
       assignment_id: 2,
       submission: {
         submitted_at: "2023-03-07",
@@ -98,8 +106,12 @@ const CourseInfo = {
   
   function getLearnerData(course, ag, subs) {
     const result=[];
-    // console.log(subs);
     const students=uniqueLearner(subs);
+    const grades=[];
+    for(let x=0;x<students.length;x++){
+      grades.push(splitLearner(subs,students[x]));
+    }
+    console.log(grades);
     return students;
     // Here is an example of what we are looking for, but no math was done
     // const result = [
@@ -172,11 +184,11 @@ const CourseInfo = {
     // and split out one specific learner by -learnID-
     // then return that array
     const learner = [];
-    for (const e of array){
-      if (array[e].learner_id === learnID) learner.push(array[e]);
+    for(let x=0;x<array.length;x++){
+      if(array[x].learner_id === learnID) learner.push(array[x]);
     }
+    learner.sort((a, b) => a.assignment_id - b.assignment_id);
     return learner;
   }
   function gradeLearner(){
-
   }
